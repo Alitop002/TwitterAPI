@@ -2,6 +2,9 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import FileExtensionValidator
 from django.utils import timezone
+
+import random
+import uuid
 NEW, CODE_VERIFIED, DONE = ('new', 'code_veridied', 'done')
 
 class User(AbstractUser):
@@ -18,6 +21,34 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
+    
+    def create_verify_code(self):
+        code = "".join([str(random.randint(0, 10000) % 10) for _ in range(4)])
+        UserConfrimation.objects.create(
+            user_id=self.id,
+            code=code
+        )
+        return code
+
+    def save(self, *args, **kwargs):
+        if not self.username:
+            username = f"username-{uuid.uuid4()}"
+            self.username = username
+        super(User, self).save(*args, **kwargs)
+        
+    def save(self, *args, **kwargs):
+        if not self.password:
+            password = f"password-{uuid.uuid4()}"
+            self.password = password
+            self.set_password(self.password)
+        super(User, self).save(*args, **kwargs)
+
+
+    # def check_pass(self):
+    #     if not self.password:
+    #         temp_password = f'password-{uuid.uuid4().__str__().split("-"[-1])}'
+    #         self.password = temp_password
+        
     
 class UserConfrimation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='confrimations')

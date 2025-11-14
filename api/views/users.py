@@ -2,12 +2,22 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from api.utils import send_code_to_email
 from api.serializers import EmailSerializer
-
+from api.models import User
 class SendEmailRegistrationAPiVIew(APIView):
     serializer_class = EmailSerializer
     def post(self, request):
-        email = request.data.get("email")
-        send_code_to_email(email=email, code='0002')
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data.get('email')
+        user = User.objects.create(
+            email=email
+        )
+        send_code_to_email(email, code=user.create_verify_code())
 
-        return Response({"message": "Habar yuborildi"})
+        data ={
+            "status": True,
+            "message": "Confirmation code has sent to email."
+        }
+
+        return Response(data=data)
     
