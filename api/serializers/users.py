@@ -34,7 +34,7 @@ class LoginSerializer(serializers.Serializer):
             if user is not None:
                 validated_data['username'] = user.username
         else:
-            validated_data['username'] = user.user_input
+            validated_data['username'] = user_input
         return validated_data
 
 class FullRegisterSerializer(serializers.Serializer):

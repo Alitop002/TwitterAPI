@@ -4,7 +4,7 @@ from api.utils import send_code_to_email
 from api.serializers import EmailSerializer, CodeSerializer, LoginSerializer, FullRegisterSerializer
 from api.models import User, CODE_VERIFIED, DONE
 from rest_framework.permissions import IsAuthenticated
-from api.utils import CustomRespone, username_or_email
+from api.utils import CustomRespone
 
 class SendEmailRegistrationAPiVIew(APIView):
     serializer_class = EmailSerializer
@@ -59,17 +59,18 @@ class LoginAPiView(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        username = serializer.validated_data.get('user_input')
-        password = serializer.validated_data.get('pasword')
+        username = serializer.validated_data.get('username')
+        password = serializer.validated_data.get('password')
 
         user = authenticate(request, username = username, password=password)
         if user is not None:
             return CustomRespone.success(
                 status =True,
-                message =  "You logged in succefully."
+                message =  "You logged in succefully.",
+                data= user.token()
             )
 
-        return CustomRespone.success(status=True, message="alimardon")
+        return CustomRespone.success(status=True, message="Username or email or password indvalid")
 
 class ResendCodeApiView(APIView):
     permission_classes = [IsAuthenticated, ]
